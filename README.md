@@ -1,10 +1,10 @@
 # WordPress Docker Stack
 
-A comprehensive Docker-based WordPress development and deployment environment using WordPress, Docker, PHP-FPM 8.4, MySQL 8.4, Nginx, Redis, and Traefik.
+A comprehensive Docker-based WordPress development and deployment environment using WordPress, Docker, PHP-FPM 8.3, MySQL 8.4, Nginx, Redis, and Traefik.
 
 ## Stack Features
 
-- **WordPress**: Latest version with PHP-FPM 8.4
+- **WordPress**: Latest version with PHP-FPM 8.3
 - **MySQL 8.4**: Database server
 - **Nginx**: Web server
 - **Redis**: Object caching
