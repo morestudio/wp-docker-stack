@@ -1,0 +1,32 @@
+# Environment variables
+.env
+
+# Ignore WordPress all core files
+wp-admin/
+wp-includes/
+wp-json/
+wp-login.php
+wp-load.php
+*.php
+
+
+# WordPress core files (will be downloaded by Docker)
+# Only keep wp-content in version control
+/wp-content/*
+!/wp-content/themes/
+!/wp-content/plugins/
+!/wp-content/mu-plugins/
+
+# Generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log

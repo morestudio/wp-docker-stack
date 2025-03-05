@@ -1,0 +1,10 @@
+path: /var/www/html
+apache_modules:
+  - mod_rewrite
+color: true
+disabled_commands:
+  - db drop
+  - plugin install
+  - plugin delete
+  - package uninstall
+  - core update

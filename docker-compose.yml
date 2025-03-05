@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  wordpress:
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=${MYSQL_USER}
+      - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+      - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+    volumes:
+      - wordpress:/var/www/html
+      - ./wordpress/wp-content:/var/www/html/wp-content
+      - ./config/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./config/php/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
+      - ./config/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql:/var/lib/mysql
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - wordpress:/var/www/html
+      - ./wordpress/wp-content:/var/www/html/wp-content
+      - ./config/nginx:/etc/nginx/conf.d
+    depends_on:
+      - wordpress
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+volumes:
+  wordpress:
+  mysql:
+  redis: 
