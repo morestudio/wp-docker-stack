@@ -6,7 +6,6 @@ services:
       - WORDPRESS_DEBUG=0
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.wordpress.tls=true"
       - "traefik.http.routers.wordpress.tls.certresolver=letsencrypt"
 
