@@ -19,6 +19,7 @@ services:
 
   traefik:
     image: traefik:v2.10
+    restart: unless-stopped
     command:
       - "--api.insecure=false"
       - "--providers.docker=true"
@@ -37,4 +38,4 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt 
+      - ./letsencrypt:/letsencrypt
