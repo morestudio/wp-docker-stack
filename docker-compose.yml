@@ -1,5 +1,12 @@
 version: '3.8'
 
+# Rotate container logs so they can't fill the disk
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   wordpress:
     build:
@@ -11,6 +18,15 @@ services:
       - WORDPRESS_DB_USER=${MYSQL_USER}
       - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
       - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+      # First-install settings (used only when WordPress is not installed yet)
+      - WORDPRESS_URL=${WP_SITEURL:-}
+      - WORDPRESS_TITLE=${WP_TITLE:-}
+      - WORDPRESS_ADMIN_USER=${WP_ADMIN_USER:-}
+      - WORDPRESS_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD:-}
+      - WORDPRESS_ADMIN_EMAIL=${WP_ADMIN_EMAIL:-}
+      - INSTALL_REDIS_PLUGIN=${INSTALL_REDIS_PLUGIN:-false}
+      - DEFAULT_THEME=${DEFAULT_THEME:-}
+      - PHP_FPM_MAX_CHILDREN=${PHP_FPM_MAX_CHILDREN:-20}
     volumes:
       - wordpress:/var/www/html
       - ./wordpress/wp-content:/var/www/html/wp-content
@@ -24,6 +40,9 @@ services:
       timeout: 3s
       retries: 3
       start_period: 300s
+    # Cap memory so a runaway PHP worker can't take down the host; tune per server
+    mem_limit: ${WORDPRESS_MEM_LIMIT:-2g}
+    logging: *default-logging
     depends_on:
       - mysql
       - redis
@@ -40,6 +59,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
       - ./config/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    logging: *default-logging
 
   nginx:
     image: nginx:alpine
@@ -48,6 +68,7 @@ services:
       - wordpress:/var/www/html
       - ./wordpress/wp-content:/var/www/html/wp-content
       - ./config/nginx:/etc/nginx/conf.d
+    logging: *default-logging
     depends_on:
       wordpress:
         condition: service_healthy
@@ -57,8 +78,9 @@ services:
     restart: unless-stopped
     volumes:
       - redis:/data
+    logging: *default-logging
 
 volumes:
   wordpress:
   mysql:
-  redis: 
+  redis:

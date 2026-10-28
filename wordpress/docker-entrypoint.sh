@@ -48,9 +48,10 @@ if [ ! -f wp-config.php ]; then
         --url="${WORDPRESS_URL:-localhost}" \
         --title="${WORDPRESS_TITLE:-WordPress Site}" \
         --admin_user="${WORDPRESS_ADMIN_USER:-admin}" \
-        --admin_password="${WORDPRESS_ADMIN_PASSWORD:-admin}" \
         --admin_email="${WORDPRESS_ADMIN_EMAIL:-admin@example.com}" \
+        ${WORDPRESS_ADMIN_PASSWORD:+--admin_password="$WORDPRESS_ADMIN_PASSWORD"} \
         --skip-email
+      # Without WORDPRESS_ADMIN_PASSWORD, WP-CLI generates a random password and prints it above
     
       echo "WordPress installed successfully!"
       echo "WordPress URL: ${WORDPRESS_URL:-localhost}"
@@ -58,23 +59,27 @@ if [ ! -f wp-config.php ]; then
       # Install recommended plugins
       if [ "${INSTALL_REDIS_PLUGIN:-false}" = "true" ]; then
         echo "Installing Redis Object Cache plugin..."
-        wp plugin install redis-cache --activate --allow-root
-        wp redis enable --allow-root
-        echo "Redis Object Cache plugin installed and activated."
+        if wp plugin install redis-cache --activate --allow-root && wp redis enable --allow-root; then
+          echo "Redis Object Cache plugin installed and activated."
+        else
+          echo "Warning: Redis Object Cache setup failed; enable it later in wp-admin."
+        fi
       fi
       
-      # Set permalink structure
-      wp rewrite structure '/%postname%/' --allow-root
+      # Set permalink structure (`wp rewrite structure` needs proc_open, which is disabled)
+      wp option update permalink_structure '/%postname%/' --allow-root
+      wp rewrite flush --allow-root
       
       # Set up default theme
       if [ -n "${DEFAULT_THEME:-}" ]; then
         echo "Setting default theme to ${DEFAULT_THEME}..."
-        wp theme install "${DEFAULT_THEME}" --activate --allow-root
+        wp theme install "${DEFAULT_THEME}" --activate --allow-root \
+          || echo "Warning: could not install theme ${DEFAULT_THEME}."
       fi
       
-      # Remove default plugins and themes we don't need
-      wp plugin delete hello akismet --allow-root
-      wp theme delete twentytwenty twentynineteen --allow-root
+      # Remove default plugins and themes we don't need (may already be absent)
+      wp plugin delete hello akismet --allow-root || true
+      wp theme delete twentytwenty twentynineteen --allow-root || true
       
       echo "WordPress setup completed!"
     fi

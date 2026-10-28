@@ -1,13 +1,16 @@
 version: '3.8'
 
+# Rotate container logs so they can't fill the disk (same as docker-compose.yml)
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   wordpress:
     environment:
       - WORDPRESS_DEBUG=0
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.tls=true"
-      - "traefik.http.routers.wordpress.tls.certresolver=letsencrypt"
 
   nginx:
     labels:
@@ -39,3 +42,4 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./letsencrypt:/letsencrypt
+    logging: *default-logging
