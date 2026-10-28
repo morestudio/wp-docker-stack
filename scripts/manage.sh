@@ -43,7 +43,7 @@ case "$1" in
         ;;
     "rebuild")
         docker compose $COMPOSE_FILES down
-        docker compose $COMPOSE_FILES build
+        docker compose $COMPOSE_FILES build --pull
         docker compose $COMPOSE_FILES up -d
         ;;
     "logs")
@@ -51,7 +51,7 @@ case "$1" in
         ;;
     "pull")
         git pull origin main
-        docker compose $COMPOSE_FILES build wordpress
+        docker compose $COMPOSE_FILES build --pull wordpress
         docker compose $COMPOSE_FILES up -d
         ;;
     "status")

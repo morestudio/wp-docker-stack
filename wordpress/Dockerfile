@@ -1,12 +1,12 @@
 # These ARG instructions define build-time variables with default values
-ARG UPLOAD_MAX_FILESIZE=${UPLOAD_MAX_FILESIZE:-64M}
-ARG POST_MAX_SIZE=${POST_MAX_SIZE:-64M}
+ARG UPLOAD_MAX_FILESIZE=${UPLOAD_MAX_FILESIZE:-30M}
+ARG POST_MAX_SIZE=${POST_MAX_SIZE:-32M}
 ARG WORDPRESS_DEBUG=${WORDPRESS_DEBUG:-0}
 ARG MEMORY_LIMIT=${MEMORY_LIMIT:-256M}
 ARG MAX_EXECUTION_TIME=${MAX_EXECUTION_TIME:-300}
 ARG MAX_INPUT_VARS=${MAX_INPUT_VARS:-3000}
 
-FROM php:8.3-fpm
+FROM php:8.3.36-fpm
 
 # Install dependencies and WordPress extensions
 RUN apt-get update && apt-get install -y \
@@ -40,8 +40,8 @@ RUN mkdir -p /var/log/php-fpm /var/lib/php/sessions /var/www/.opcache \
 
 # Set recommended PHP.ini settings
 RUN { \
-    echo 'upload_max_filesize = 64M'; \
-    echo 'post_max_size = 64M'; \
+    echo 'upload_max_filesize = 30M'; \
+    echo 'post_max_size = 32M'; \
     echo 'memory_limit = 256M'; \
     echo 'max_execution_time = 300'; \
     echo 'max_input_vars = 3000'; \
