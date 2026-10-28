@@ -112,7 +112,9 @@ ENVIRONMENT=<local|dev|prod> ./scripts/manage.sh <command>
 Available commands:
 - `start`: Start all services
 - `stop`: Stop all services
-- `restart`: Restart all services
+- `restart [service...]`: Restart the given services (default: `wordpress`)
+- `reload`: Gracefully reload PHP-FPM and Nginx config (no downtime)
+- `rebuild`: Rebuild images and recreate changed containers
 - `logs`: View logs
 - `pull`: Update code from git and rebuild
 - `status`: Check container status

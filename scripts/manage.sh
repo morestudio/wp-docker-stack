@@ -39,10 +39,17 @@ case "$1" in
         docker compose $COMPOSE_FILES down
         ;;
     "restart")
-        docker compose $COMPOSE_FILES restart
+        # Restart only the given services (default: wordpress) instead of the whole stack
+        shift
+        docker compose $COMPOSE_FILES restart "${@:-wordpress}"
+        ;;
+    "reload")
+        # Graceful reload: PHP-FPM finishes in-flight requests, nginx re-reads config
+        docker compose $COMPOSE_FILES kill -s USR2 wordpress
+        docker compose $COMPOSE_FILES exec nginx nginx -s reload
         ;;
     "rebuild")
-        docker compose $COMPOSE_FILES down
+        # Build while old containers keep serving, then recreate only what changed
         docker compose $COMPOSE_FILES build --pull
         docker compose $COMPOSE_FILES up -d
         ;;
@@ -87,7 +94,7 @@ case "$1" in
         echo "Database restored from $2"
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|logs|pull|status|wp|shell|db-backup|db-restore}"
+        echo "Usage: $0 {start|stop|restart [service...]|reload|rebuild|logs|pull|status|wp|shell|db-backup|db-restore}"
         exit 1
         ;;
 esac 

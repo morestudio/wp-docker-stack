@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# MariaDB 11 client verifies TLS certs by default, but the bundled mysql service uses
+# an auto-generated self-signed cert. Skip verification only for that internal host;
+# any external DB host keeps full verification.
+if [ "$WORDPRESS_DB_HOST" = "mysql" ]; then
+    printf '[client]\nssl-verify-server-cert = off\n' > /etc/mysql/mariadb.conf.d/99-docker-client.cnf
+else
+    rm -f /etc/mysql/mariadb.conf.d/99-docker-client.cnf
+fi
+
 # Wait for MySQL to be ready
 echo "Waiting for MySQL to be ready..."
 until mysqladmin ping -h"$WORDPRESS_DB_HOST" --silent; do
@@ -71,11 +80,11 @@ if [ ! -f wp-config.php ]; then
     fi
 fi
 
-# Ensure proper permissions
+# Ensure proper permissions (only touch files that are wrong, batched, to keep startup fast)
 echo "Setting file permissions..."
-chown -R www-data:www-data /var/www/html
-find /var/www/html -type d -exec chmod 755 {} \;
-find /var/www/html -type f -exec chmod 644 {} \;
+find /var/www/html \( ! -user www-data -o ! -group www-data \) -exec chown -h www-data:www-data {} +
+find /var/www/html -type d ! -perm 755 -exec chmod 755 {} +
+find /var/www/html -type f ! -perm 644 -exec chmod 644 {} +
 
 # Create a system link for easy CLI access
 if [ ! -e "/usr/bin/wpcli" ]; then
