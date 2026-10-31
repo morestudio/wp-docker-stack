@@ -49,7 +49,8 @@ case "$1" in
         docker compose $COMPOSE_FILES exec nginx nginx -s reload
         ;;
     "rebuild")
-        # Build while old containers keep serving, then recreate only what changed
+        # Pull/build while old containers keep serving, then recreate only what changed
+        docker compose $COMPOSE_FILES pull
         docker compose $COMPOSE_FILES build --pull
         docker compose $COMPOSE_FILES up -d
         ;;
@@ -58,6 +59,7 @@ case "$1" in
         ;;
     "pull")
         git pull origin main
+        docker compose $COMPOSE_FILES pull
         docker compose $COMPOSE_FILES build --pull wordpress
         docker compose $COMPOSE_FILES up -d
         ;;
